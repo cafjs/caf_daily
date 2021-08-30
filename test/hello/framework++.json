@@ -1,0 +1,36 @@
+{
+    "name": "top",
+    "env" : {
+        "appProtocol" : "http",
+        "appPublisher" :"root",
+        "appLocalName" : "appinfo",
+        "appSuffix" : "vcap.me:3000"
+    },
+    "components": [
+        {
+            "name": "log",
+            "env" : {
+                  "logLevel" : "DEBUG"
+
+            }
+
+        },
+        {
+            "name": "security",
+            "module": null
+        },
+        {
+            "name": "cp2"
+        },
+        {
+            "name": "appInfo",
+            "module": "../../index.js#plug",
+            "description": "App Info service.",
+            "env" : {
+                "appInfoDir" : "process.env.APP_INFO_DIR||null",
+                "appInfoFile" : "process.env.APP_INFO_FILE||appInfo.json",
+                "reloadAppInfoIntervalInSec" : "process.env.RELOAD_APP_INFO_INTERVAL_IN_SEC||2"
+            }
+        }
+    ]
+}
