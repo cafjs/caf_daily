@@ -3,7 +3,7 @@
     "env" : {
         "appProtocol" : "http",
         "appPublisher" :"root",
-        "appLocalName" : "appinfo",
+        "appLocalName" : "daily",
         "appSuffix" : "vcap.me:3000"
     },
     "components": [
@@ -23,13 +23,10 @@
             "name": "cp2"
         },
         {
-            "name": "appInfo",
+            "name": "daily",
             "module": "../../index.js#plug",
-            "description": "App Info service.",
+            "description": "Daily.co service.",
             "env" : {
-                "appInfoDir" : "process.env.APP_INFO_DIR||null",
-                "appInfoFile" : "process.env.APP_INFO_FILE||appInfo.json",
-                "reloadAppInfoIntervalInSec" : "process.env.RELOAD_APP_INFO_INTERVAL_IN_SEC||2"
             }
         }
     ]

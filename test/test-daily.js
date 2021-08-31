@@ -1,4 +1,4 @@
-"use strict"
+'use strict';
 
 const hello = require('./hello/main.js');
 const app = hello;
@@ -11,12 +11,14 @@ const cli = caf_core.caf_cli;
 
 const crypto = require('crypto');
 
-const APP_FULL_NAME = 'root-appinfo';
+const APP_FULL_NAME = 'root-daily';
 
 const CA_OWNER_1='root';
 const CA_LOCAL_NAME_1='ca1'+ crypto.randomBytes(8).toString('hex');
 const FROM_1 =  CA_OWNER_1 + '-' + CA_LOCAL_NAME_1;
 const FQN_1 = APP_FULL_NAME + '#' + FROM_1;
+
+const DAILY_KEY_API = process.env['DAILY_KEY_API'];
 
 process.on('uncaughtException', function (err) {
                console.log("Uncaught Exception: " + err);
@@ -50,23 +52,26 @@ module.exports = {
         }
     },
 
-    appInfo: function(test) {
+    daily: function(test) {
         let s1;
         const from1 = FROM_1;
-        test.expect(4);
+        test.expect(7);
+        let roomName = null;
         async.series(
             [
                 function(cb) {
-                    s1 = new cli.Session('ws://root-appinfo.vcap.me:3000',
+                    s1 = new cli.Session('ws://root-daily.vcap.me:3000',
                                          from1, {
                                              from : from1
                                          });
                     s1.onopen = async function() {
                         try {
-                            const nginx  = await s1.getAppInfo('nginx')
-                                .getPromise();
-                            test.ok(nginx);
-                            console.log(JSON.stringify(nginx));
+                            await s1.setKeyAPI(DAILY_KEY_API).getPromise();
+                            const roomId = await s1.createRoom(3600)
+                                  .getPromise();
+                            console.log(roomId);
+                            test.ok(roomId.indexOf('create_') === 0);
+                            roomName = roomId.slice(7);
                             cb(null);
                         } catch (err) {
                             test.ok(false, 'Got exception ' + err);
@@ -75,8 +80,15 @@ module.exports = {
                     };
                 },
                 async function(cb) {
+                    setTimeout(cb, 4000);
+                },
+                async function(cb) {
                     try {
-                        await s1.reload().getPromise();
+                        const data = await s1.getState().getPromise();
+                        test.ok(data.isKeyAPI);
+                        test.ok(data.rooms[0].url &&
+                                (data.rooms[0].name === roomName), 'No URL');
+                        console.log(JSON.stringify(data));
                         cb(null);
                     } catch (err) {
                         test.ok(false, 'Got exception ' + err);
@@ -84,15 +96,12 @@ module.exports = {
                     }
                 },
                 async function(cb) {
-                    // force a few cron reloads.
-                    setTimeout(cb, 4000);
-                },
-                async function(cb) {
                     try {
-                        const hue = await s1.getAppInfo('root-hellohue')
-                              .getPromise();
-                        test.ok(hue);
-                        console.log(JSON.stringify(hue));
+                        await s1.deleteRoom(roomName).getPromise();
+                        const data = await s1.getState().getPromise();
+                        test.ok(data.isKeyAPI);
+                        test.ok(data.rooms.length === 0, 'Not deleted');
+                        console.log(JSON.stringify(data));
                         cb(null);
                     } catch (err) {
                         test.ok(false, 'Got exception ' + err);

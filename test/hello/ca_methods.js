@@ -18,30 +18,31 @@ limitations under the License.
 exports.methods = {
     async __ca_init__() {
         this.$.log.debug("++++++++++++++++Calling init");
-        this.state.pulses = 0;
-        return [];
-    },
-    async __ca_pulse__() {
-        this.state.pulses = this.state.pulses + 1;
-        this.$.log.debug('<<< Calling Pulse>>>' + this.state.pulses);
+        this.$.daily.setHandleReplyMethod('__ca_handle__');
         return [];
     },
 
-    async getAppInfo(app) {
-        try {
-            return [null, this.$.appInfo.getAppInfo(app)];
-        } catch (err) {
-            console.log('getAppInfo FAIL:' + err);
-            return [err];
-        }
+    async __ca_handle__(id, response) {
+        this.$.log.debug(`handle: id ${id} and ` +
+                         `response ${JSON.stringify(response)}`);
+        return [];
     },
 
-    async reload() {
-        await this.$.appInfo.reload();
-        return this.getState();
+    async setKeyAPI(key) {
+        this.$.daily.setKeyAPI(key);
+        return [];
+    },
+
+    async createRoom(duration) {
+        return [null, this.$.daily.createRoom(duration)];
+    },
+
+    async deleteRoom(name) {
+        return  [null, this.$.daily.deleteRoom(name)];
+
     },
 
     async getState() {
-        return [null, this.state];
+        return [null, this.$.daily.getDailyInfo()];
     }
 };

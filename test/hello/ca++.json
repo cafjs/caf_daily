@@ -7,8 +7,8 @@
         },
         {
             "module": "../../index.js#plug_ca",
-            "name": "appInfo",
-            "description": "Manages an app info service for a CA",
+            "name": "daily",
+            "description": "Manages a Daily.co service for a CA",
             "env" : {
                 "maxRetries" : "$._.env.maxRetries",
                 "retryDelay" : "$._.env.retryDelay"
@@ -17,7 +17,7 @@
                 {
                     "module": "../../index.js#proxy",
                     "name": "proxy",
-                    "description": "Allows access to an app info service",
+                    "description": "Allows access to a Daily.co service",
                     "env" : {
                     }
                 }
